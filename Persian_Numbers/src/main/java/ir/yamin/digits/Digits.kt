@@ -31,6 +31,8 @@ class Digits {
     
     private val zeroBigInteger : BigInteger by lazy(LazyThreadSafetyMode.NONE) { BigInteger.ZERO }
     private val oneBigInteger : BigInteger by lazy(LazyThreadSafetyMode.NONE) { BigInteger.ONE }
+
+    private var convertPowerOfThousandsOnly: Boolean = false
     
     /**
      * Spell number to Persian/Farsi words
@@ -38,7 +40,9 @@ class Digits {
      * @param number in any type like Byte/Short/Int/Long/String/Big Integer
      * @return Persian representation of that number in String type
      */
-    fun spellToFarsi(number : Any) : String {
+    @JvmOverloads
+    fun spellToFarsi(number : Any, convertPowerOfThousandsOnly: Boolean = false) : String {
+        this.convertPowerOfThousandsOnly = convertPowerOfThousandsOnly
         return try {
             when (number) {
                 is Byte -> spellToFarsi("${number.toInt()}")
@@ -64,8 +68,8 @@ class Digits {
      * @return Persian representation of that number plus currency name in String type
      */
     @JvmOverloads
-    fun spellToIranMoney(number : Any, currency : IranCurrency = IranCurrency.RIAL) : String {
-        return "${spellToFarsi(number)} ${currency.value}"
+    fun spellToIranMoney(number : Any, convertPowerOfThousandsOnly: Boolean = false, currency : IranCurrency = IranCurrency.RIAL) : String {
+        return "${spellToFarsi(number, convertPowerOfThousandsOnly)} ${currency.value}"
     }
     
     /**
@@ -85,9 +89,9 @@ class Digits {
         }
         
         return when (number.length) {
-            1 -> singleDigits[number.toLong()] ?: NaN
-            2 -> twoDigitHandler(number)
-            3 -> threeDigitsHandler(number)
+            1 -> if(convertPowerOfThousandsOnly) number else singleDigits[number.toLong()] ?: NaN
+            2 -> if(convertPowerOfThousandsOnly) number else twoDigitHandler(number)
+            3 -> if(convertPowerOfThousandsOnly) number else threeDigitsHandler(number)
             else -> digitsHandler(number)
         }
     }
@@ -195,7 +199,7 @@ class Digits {
         singleDigits[longNumber]?.let { return it }
         twoDigits[longNumber]?.let { return it }
         threeDigits[longNumber]?.let { return it }
-        tenPowers[longNumber]?.let { return "${PersianNumber.ONE} $it" }
+        tenPowers[longNumber]?.let { return "${if(convertPowerOfThousandsOnly) 1 else PersianNumber.ONE} $it" }
         
         //biggest ten power before input number
         val biggestTenPower = findBiggestTenPowerBeforeInputNumber(longNumber)
@@ -338,7 +342,7 @@ class Digits {
         input.forEach { char -> isNumberOnly = isNumberOnly && char in '0'..'9' }
         return isNumberOnly
     }
-    
+
     companion object {
         
         /**
