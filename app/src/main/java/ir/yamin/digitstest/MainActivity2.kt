@@ -1,40 +1,28 @@
-package ir.yamin.digitstest;
+package ir.yamin.digitstest
 
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.EditText
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import ir.yamin.digits.Digits
 
-import androidx.appcompat.app.AppCompatActivity;
-import ir.yamin.digits.Digits;
+class MainActivity2 : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main2)
 
-public class MainActivity2 extends AppCompatActivity {
+        val editText = findViewById<EditText>(R.id.numberEditTextJava)
+        val textView = findViewById<TextView>(R.id.textViewJava)
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
-
-        EditText editText = findViewById(R.id.numberEditTextJava);
-        TextView textView = findViewById(R.id.textViewJava);
-
-        editText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+        editText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable) {
+                val number = s.toString()
+                textView.text = Digits(this@MainActivity2).spellToIranMoney(number, true)
             }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                String number = s.toString();
-                textView.setText(new Digits().spellToFarsi(number, true));
-            }
-        });
+        })
     }
 }

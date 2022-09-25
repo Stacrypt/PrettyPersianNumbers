@@ -1,3 +1,5 @@
 package ir.yamin.digits.constants
 
-enum class IranCurrency(val value : String) { RIAL("ریال"), TOMAN("تومان") }
+import ir.yamin.digits.R
+
+enum class IranCurrency(val value : Int) { RIAL(R.string.rial), TOMAN(R.string.toman) }

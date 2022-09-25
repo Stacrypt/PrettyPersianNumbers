@@ -2,18 +2,9 @@
 
 package ir.yamin.digits
 
+import android.content.Context
 import ir.yamin.digits.constants.IranCurrency
 import ir.yamin.digits.constants.PersianNumber
-import ir.yamin.digits.constants.PersianNumber.AND
-import ir.yamin.digits.constants.PersianNumber.MINUS
-import ir.yamin.digits.constants.PersianNumber.RADIX
-import ir.yamin.digits.constants.PersianNumber.ZERO
-import ir.yamin.digits.constants.PersianNumber.bigIntegerTenPowers
-import ir.yamin.digits.constants.PersianNumber.bigTen
-import ir.yamin.digits.constants.PersianNumber.singleDigits
-import ir.yamin.digits.constants.PersianNumber.tenPowers
-import ir.yamin.digits.constants.PersianNumber.threeDigits
-import ir.yamin.digits.constants.PersianNumber.twoDigits
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -24,7 +15,7 @@ private const val zeroChar = '0'
 private const val dashChar = '-'
 private const val dotChar = '.'
 
-class Digits {
+class Digits(private val context: Context) {
     
     private val zeroOnlyRegex : Regex by lazy(LazyThreadSafetyMode.NONE) { Regex(ZERO_ONLY_REGEX) }
     private val decimalRegex : Regex by lazy(LazyThreadSafetyMode.NONE) { Regex(DECIMAL_REGEX) }
@@ -33,6 +24,8 @@ class Digits {
     private val oneBigInteger : BigInteger by lazy(LazyThreadSafetyMode.NONE) { BigInteger.ONE }
 
     private var convertPowerOfThousandsOnly: Boolean = false
+
+    private var persianNumber = PersianNumber(context)
     
     /**
      * Spell number to Persian/Farsi words
@@ -69,7 +62,7 @@ class Digits {
      */
     @JvmOverloads
     fun spellToIranMoney(number : Any, convertPowerOfThousandsOnly: Boolean = false, currency : IranCurrency = IranCurrency.RIAL) : String {
-        return "${spellToFarsi(number, convertPowerOfThousandsOnly)} ${currency.value}"
+        return "${spellToFarsi(number, convertPowerOfThousandsOnly)} ${context.getString(currency.value)}"
     }
     
     /**
@@ -89,7 +82,7 @@ class Digits {
         }
         
         return when (number.length) {
-            1 -> if(convertPowerOfThousandsOnly) number else singleDigits[number.toLong()] ?: NaN
+            1 -> if(convertPowerOfThousandsOnly) number else persianNumber.singleDigits[number.toLong()] ?: NaN
             2 -> if(convertPowerOfThousandsOnly) number else twoDigitHandler(number)
             3 -> if(convertPowerOfThousandsOnly) number else threeDigitsHandler(number)
             else -> digitsHandler(number)
@@ -109,8 +102,8 @@ class Digits {
         return if (numberWithoutMinus.isNotBlank()) {
             //when normal input like -12 -123123 -5612 -0
             if (isNumberOnly(numberWithoutMinus)) {
-                return if (zeroOnlyRegex.matches(numberWithoutMinus)) ZERO
-                else "$MINUS ${stringHandler(numberWithoutMinus)}"
+                return if (zeroOnlyRegex.matches(numberWithoutMinus)) persianNumber.ZERO
+                else "${persianNumber.MINUS} ${stringHandler(numberWithoutMinus)}"
             }
             //when input contains anything other than numbers 0-9 like --, -., -.5, -1.5
             else {
@@ -129,7 +122,7 @@ class Digits {
      * @return string with starting zeros removed
      */
     private fun handleStringsWithZeroPrefix(number : String) : String {
-        if (zeroOnlyRegex.matches(number)) return ZERO
+        if (zeroOnlyRegex.matches(number)) return persianNumber.ZERO
         /**
          * this can probably be replaced with some smart-ass regex with lookahead,
          * but that makes it more complex
@@ -140,7 +133,7 @@ class Digits {
          * then starting index is 4 and new string is 12
          */
         return number.indices.firstOrNull { number[it] != zeroChar }
-                   ?.let { stringHandler(number.substring(it)) } ?: ZERO
+                   ?.let { stringHandler(number.substring(it)) } ?: persianNumber.ZERO
     }
     
     /**
@@ -152,10 +145,10 @@ class Digits {
     private fun twoDigitHandler(number : String) : String {
         if (number.length < 2) return stringHandler(number)
         //return if number is exactly from twoDigits list
-        twoDigits[number.toLong()]?.let { return it }
+        persianNumber.twoDigits[number.toLong()]?.let { return it }
         val oneNotation = "${number[1]}".toLong()
         val tenNotation = ("${number[0]}".toLong()) * 10
-        return "${twoDigits[tenNotation]} $AND ${singleDigits[oneNotation]}"
+        return "${persianNumber.twoDigits[tenNotation]} ${persianNumber.AND} ${persianNumber.singleDigits[oneNotation]}"
     }
     
     /**
@@ -166,11 +159,11 @@ class Digits {
      */
     private fun threeDigitsHandler(number : String) : String {
         //return if number is exactly from threeDigits list
-        threeDigits[number.toLong()]?.let { return it }
+        persianNumber.threeDigits[number.toLong()]?.let { return it }
         val oneNotation = "${number[2]}".toLong()
         val tenNotation = (("${number[1]}".toLong()) * 10) + oneNotation
         val hundredNotation = ("${number[0]}".toLong()) * 100
-        return "${threeDigits[hundredNotation]} $AND ${twoDigitHandler("$tenNotation")}"
+        return "${persianNumber.threeDigits[hundredNotation]} ${persianNumber.AND} ${twoDigitHandler("$tenNotation")}"
     }
     
     /**
@@ -196,21 +189,21 @@ class Digits {
      * @return persian representation of that number
      */
     private fun longHandler(longNumber : Long) : String {
-        singleDigits[longNumber]?.let { return it }
-        twoDigits[longNumber]?.let { return it }
-        threeDigits[longNumber]?.let { return it }
-        tenPowers[longNumber]?.let { return "${if(convertPowerOfThousandsOnly) 1 else PersianNumber.ONE} $it" }
+        persianNumber.singleDigits[longNumber]?.let { return it }
+        persianNumber.twoDigits[longNumber]?.let { return it }
+        persianNumber.threeDigits[longNumber]?.let { return it }
+        persianNumber.tenPowers[longNumber]?.let { return "${if(convertPowerOfThousandsOnly) 1 else persianNumber.ONE} $it" }
         
         //biggest ten power before input number
         val biggestTenPower = findBiggestTenPowerBeforeInputNumber(longNumber)
         if (biggestTenPower == 0L) return stringHandler("$longNumber")
         
         val tenPowerDivisor = stringHandler("${longNumber / biggestTenPower}")
-        val tenPowerName = tenPowers[biggestTenPower] ?: ""
+        val tenPowerName = persianNumber.tenPowers[biggestTenPower] ?: ""
         val remainderNumber = longNumber % biggestTenPower
         if (remainderNumber == 0L) return "$tenPowerDivisor $tenPowerName"
         val remainderNumberName = stringHandler("$remainderNumber")
-        return "$tenPowerDivisor $tenPowerName و $remainderNumberName"
+        return "$tenPowerDivisor $tenPowerName ${persianNumber.AND} $remainderNumberName"
     }
     
     /**
@@ -223,7 +216,7 @@ class Digits {
     private fun findBiggestTenPowerBeforeInputNumber(longNumber : Long) : Long {
         var biggestTenPower = 0L
         if (longNumber >= 1_000L) {
-            for (power in tenPowers) if (longNumber / power.key in 1 until longNumber) biggestTenPower = power.key
+            for (power in persianNumber.tenPowers) if (longNumber / power.key in 1 until longNumber) biggestTenPower = power.key
         }
         return biggestTenPower
     }
@@ -236,26 +229,26 @@ class Digits {
         val tenPowerDivisor = stringHandler("${input.divide(biggestTenPower)}")
         
         var tenPowerName = NaN
-        bigIntegerTenPowers[biggestTenPower]?.let { tenPowerName = it }
-        tenPowers[biggestTenPower.toLong()]?.let { tenPowerName = it }
+        persianNumber.bigIntegerTenPowers[biggestTenPower]?.let { tenPowerName = it }
+        persianNumber.tenPowers[biggestTenPower.toLong()]?.let { tenPowerName = it }
         
         val remainderNumber = input.mod(biggestTenPower)
         if (remainderNumber == zeroBigInteger) return "$tenPowerDivisor $tenPowerName"
         val remainderNumberName = stringHandler("$remainderNumber")
-        return "$tenPowerDivisor $tenPowerName $AND $remainderNumberName"
+        return "$tenPowerDivisor $tenPowerName ${persianNumber.AND} $remainderNumberName"
     }
     
     private fun findBiggestTenPowerBeforeInputNumber(input : BigInteger) : BigInteger {
         var biggestTenPower = zeroBigInteger
         
         if (input >= BigInteger("1000")) {
-            for (power in tenPowers) {
+            for (power in persianNumber.tenPowers) {
                 val temp = input.divide(power.key.toBigInteger())
                 if (temp >= oneBigInteger && temp < input) biggestTenPower = power.key.toBigInteger()
             }
         }
-        if (input >= bigTen.pow(21)) {
-            for (power in bigIntegerTenPowers) {
+        if (input >= persianNumber.bigTen.pow(21)) {
+            for (power in persianNumber.bigIntegerTenPowers) {
                 val temp = input.divide(power.key)
                 if (temp >= oneBigInteger && temp < input) biggestTenPower = power.key
             }
@@ -282,8 +275,8 @@ class Digits {
     private fun bigDecimalHandler(bigDecimal : BigDecimal) : String {
         val zeroDecimal = BigDecimal.ZERO
         when (bigDecimal.compareTo(zeroDecimal)) {
-            -1 -> return "$MINUS ${bigDecimalHandler(bigDecimal.abs())}"
-            0 -> return ZERO
+            -1 -> return "${persianNumber.MINUS} ${bigDecimalHandler(bigDecimal.abs())}"
+            0 -> return persianNumber.ZERO
             1 -> {
                 //dividing integer and fraction part from decimal
                 val integerPart = bigDecimal.toBigInteger()
@@ -294,9 +287,9 @@ class Digits {
                 //if bigDecimal is 3.14 then decimals is 14
                 val decimals = fraction.scaleByPowerOfTen(fraction.scale())
                 //if bigDecimal is 3.14 then ten power is 100 or صدم
-                val tenPower = bigTen.pow(fraction.scale())
+                val tenPower = persianNumber.bigTen.pow(fraction.scale())
                 //add م to صد so it becomes صدم
-                var tenPowerName = "${bigIntegerHandler(tenPower)}${PersianNumber.TH}"
+                var tenPowerName = "${bigIntegerHandler(tenPower)}${persianNumber.TH}"
                 tenPowerName = normalizeTenPowerName(tenPowerName)
                 //if input is only fraction like 0.5, 0.0002
                 val isFractionOnly = integerPart == zeroBigInteger || integerPart.compareTo(
@@ -305,7 +298,7 @@ class Digits {
                 if (isFractionOnly) return "$fractionName $tenPowerName"
                 //if input is normal like 3.14, 3.121323, 15.00001
                 val integerName = bigIntegerHandler(integerPart)
-                return "$integerName $RADIX $fractionName، $tenPowerName"
+                return "$integerName ${persianNumber.RADIX} $fractionName، $tenPowerName"
             }
         }
         return NaN
@@ -323,7 +316,7 @@ class Digits {
      */
     private fun normalizeTenPowerName(input : String) : String {
         var tenPowerName = input
-        val persianOne = PersianNumber.ONE
+        val persianOne = persianNumber.ONE
         if (tenPowerName.startsWith(persianOne)) {
             tenPowerName = tenPowerName.replace(persianOne, "").trim()
         }
@@ -349,6 +342,6 @@ class Digits {
          * extension method to for spelling number to farsi
          *
          */
-        fun Any.spell() = Digits().spellToFarsi(this)
+        fun Any.spell(context: Context) = Digits(context).spellToFarsi(this)
     }
 }

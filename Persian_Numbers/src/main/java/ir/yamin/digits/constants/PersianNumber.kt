@@ -1,50 +1,52 @@
 package ir.yamin.digits.constants
 
+import android.content.Context
+import ir.yamin.digits.R
 import java.math.BigInteger
 
 /**
  * numbers representation in Formal Persian
  */
-internal object PersianNumber {
+internal class PersianNumber(context: Context) {
     
     //صدم، میلیونم، دهم و ...
-    internal const val TH = "م"
-    internal const val MINUS = "منفی"
-    internal const val RADIX = "ممیز"
-    internal const val ZERO = "صفر"
-    internal const val ONE = "یک"
-    internal const val AND = "و"
-    private const val TWO = "دو"
-    private const val THREE = "سه"
-    private const val FOUR = "چهار"
-    private const val FIVE = "پنج"
-    private const val SIX = "شش"
-    private const val SEVEN = "هفت"
-    private const val EIGHT = "هشت"
-    private const val NINE = "نه"
-    private const val TEN = "ده"
-    private const val HUNDRED = "صد"
-    private const val THOUSAND = "هزار"
-    private const val MILLION = "میلیون"
-    private const val MILLIARD = "میلیارد"
-    private const val TRILLION = "تریلیون"
-    private const val QUADRILLION = "کوآدریلیون"
-    private const val QUINTILLION = "کوینتیلیون"
-    private const val SEXTILLION = "سکستیلیون"
-    private const val SEPTILLION = "سپتیلیون"
-    private const val OCTILLION = "اکتیلیون"
-    private const val NONILLION = "نانیلیون"
-    private const val DECILLION = "دسیلیون"
-    private const val UNDECILLION = "آندسیلیون"
-    private const val DUODECILLION = "دیودسیلیون"
-    private const val TREDECILLION = "تریدسیلیون"
-    private const val QUATTUORDECILLION = "کواتیوردسیلیون"
-    private const val QUINDECILLION = "کویندسیلیون"
-    private const val SEXDECILLION = "سکسدسیلیون"
-    private const val SEPTENDECILLION = "سپتدسیلیون"
-    private const val OCTODECILLION = "اُکتودسیلیون"
-    private const val NOVEMDECILLION = "نومدسیلیون"
-    private const val VIGINTILLION = "ویجینتیلیون"
+    internal val TH = context.getString(R.string.th)
+    internal val MINUS = context.getString(R.string.minus)
+    internal val RADIX = context.getString(R.string.point)
+    internal val ZERO = context.getString(R.string.zero)
+    internal val ONE = context.getString(R.string.one)
+    internal val AND = context.getString(R.string.and)
+    private val TWO = context.getString(R.string.two)
+    private val THREE = context.getString(R.string.three)
+    private val FOUR = context.getString(R.string.four)
+    private val FIVE = context.getString(R.string.five)
+    private val SIX = context.getString(R.string.six)
+    private val SEVEN = context.getString(R.string.seven)
+    private val EIGHT = context.getString(R.string.eight)
+    private val NINE = context.getString(R.string.nine)
+    private val TEN = context.getString(R.string.ten)
+    private val HUNDRED = context.getString(R.string.hundred)
+    private val THOUSAND = context.getString(R.string.thousand)
+    private val MILLION = context.getString(R.string.million)
+    private val MILLIARD = context.getString(R.string.billion)
+    private val TRILLION = context.getString(R.string.trillion)
+    private val QUADRILLION = context.getString(R.string.quadrillion)
+    private val QUINTILLION = context.getString(R.string.quintillion)
+    private val SEXTILLION = context.getString(R.string.sextillion)
+    private val SEPTILLION = context.getString(R.string.septillion)
+    private val OCTILLION = context.getString(R.string.octillion)
+    private val NONILLION = context.getString(R.string.nonillion)
+    private val DECILLION = context.getString(R.string.decillion)
+    private val UNDECILLION = context.getString(R.string.undecillion)
+    private val DUODECILLION = context.getString(R.string.duodecillion)
+    private val TREDECILLION = context.getString(R.string.tredecillion)
+    private val QUATTUORDECILLION = context.getString(R.string.quattuordecillion)
+    private val QUINDECILLION = context.getString(R.string.quindecillion)
+    private val SEXDECILLION = context.getString(R.string.sexdecillion)
+    private val SEPTENDECILLION = context.getString(R.string.septendecillion)
+    private val OCTODECILLION = context.getString(R.string.octodecillion)
+    private val NOVEMDECILLION = context.getString(R.string.novemdecillion)
+    private val VIGINTILLION = context.getString(R.string.vigintillion)
     
     /**
      * Single digits numbers representation
@@ -58,18 +60,22 @@ internal object PersianNumber {
      * Two digits numbers representation
      */
     val twoDigits = mapOf(
-            10L to TEN, 11L to "یاز$TEN", 12L to "دواز$TEN", 13L to "سیز$TEN",
-            14L to "$FOUR$TEN", 15L to "پانز$TEN", 16L to "شانز$TEN", 17L to "هف$TEN",
-            18L to "هج$TEN", 19L to "نوز$TEN", 20L to "بیست", 30L to "سی", 40L to "چهل",
-            50L to "پنجاه", 60L to "شصت", 70L to "هفتاد", 80L to "هشتاد", 90L to "نود",
+            10L to TEN, 11L to context.getString(R.string.eleven), 12L to context.getString(R.string.twelve), 13L to context.getString(
+                        R.string.thirteen),
+            14L to context.getString(R.string.fourteen), 15L to context.getString(R.string.fifteen), 16L to context.getString(
+                        R.string.sixteen), 17L to context.getString(R.string.seventeen),
+            18L to context.getString(R.string.eighteen), 19L to context.getString(R.string.nineteen), 20L to context.getString(
+                        R.string.twenty), 30L to context.getString(R.string.thirty), 40L to context.getString(R.string.forty),
+            50L to context.getString(R.string.fifty), 60L to context.getString(R.string.sixty), 70L to context.getString(
+                        R.string.seventy), 80L to context.getString(R.string.eighty), 90L to context.getString(R.string.ninety),
                          )
     
     /**
      * Three digits numbers representation
      */
     val threeDigits = mapOf(
-            100L to "یک$HUNDRED", 200L to "دویست", 300L to "سی$HUNDRED",
-            400L to "$FOUR$HUNDRED", 500L to "پان$HUNDRED", 600L to "$SIX$HUNDRED",
+            100L to "$ONE $HUNDRED", 200L to context.getString(R.string.two_hundred), 300L to context.getString(R.string.three_hundred),
+            400L to "$FOUR$HUNDRED", 500L to context.getString(R.string.five_hundred), 600L to "$SIX$HUNDRED",
             700L to "$SEVEN$HUNDRED", 800L to "$EIGHT$HUNDRED", 900L to "$NINE$HUNDRED",
                            )
     
